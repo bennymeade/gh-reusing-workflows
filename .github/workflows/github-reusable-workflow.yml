@@ -1,4 +1,4 @@
-name: Reusable workflow example
+name: Reusable workflow with Github native
 
 on:
   workflow_call:
