@@ -1,0 +1,20 @@
+name: Triggering a workflow
+on:
+  workflow_dispatch:
+
+jobs:
+  trigger-build:
+    permissions:
+      actions: write
+    runs-on: ubuntu-latest
+    name: Invoke workflow with inputs
+    steps:
+      # Uses -> https://github.com/benc-uk/workflow-dispatch/tree/v1
+      - uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: plugin-reusable-workflow.yml
+
+  call-workflow-passing-data:
+    # uses -> https://docs.github.com/en/actions/using-workflows/reusing-workflows
+    uses: ./.github/workflows/github-reusable-workflow.yml
+    secrets: inherit

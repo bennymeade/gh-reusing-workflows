@@ -1,0 +1,46 @@
+name: Reusable workflow example
+
+on:
+  workflow_call:
+    secrets:
+      JIRA_REPORTER_EMAIL:
+        required: true
+      JIRA_API_TOKEN:
+        required: true
+      JIRA_BOARD_ID:
+        required: true
+      JIRA_PROJECT_KEY:
+        required: true
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node: [18]
+
+    steps:
+    - name: Set current date
+      run: |
+        echo "DATE_TODAY=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+
+    - name: Get latest active sprint ID
+      run: |
+        response=$(curl --silent --user '${{ secrets.JIRA_REPORTER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}' \
+          --header 'Accept: application/json' \
+          --request GET \
+          --url 'https://ce-platform.atlassian.net/rest/agile/1.0/board/${{ secrets.JIRA_BOARD_ID }}/sprint?state=active' \
+        )
+        latest_sprint_id=$(echo "$response" | jq -r '.values[0].id')
+        echo "LATEST_SPRINT_ID=$latest_sprint_id" >> $GITHUB_ENV
+    
+    - name: Get issue type 'Task' ID
+      run: |
+        ISSUE_TYPES=$(curl --silent --user '${{ secrets.JIRA_REPORTER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}' \
+          --header 'Accept: application/json' \
+          --request GET \
+          --url 'https://ce-platform.atlassian.net/rest/api/3/project/${{ secrets.JIRA_PROJECT_KEY }}' | jq '.issueTypes[] | {id, name}')
+
+        TASK_ISSUE_TYPE_ID=$(echo "$ISSUE_TYPES" | jq -r 'select(.name == "Task").id')
+        echo "TASK_ISSUE_TYPE_ID=$TASK_ISSUE_TYPE_ID" >> $GITHUB_ENV

@@ -1,0 +1,87 @@
+name: Reusable workflow
+
+on: [workflow_dispatch]
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node: [18]
+
+    steps:
+    - name: Set current date
+      run: |
+        echo "DATE_TODAY=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+
+    - name: Get latest active sprint ID
+      run: |
+        response=$(curl --silent --user '${{ secrets.JIRA_REPORTER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}' \
+          --header 'Accept: application/json' \
+          --request GET \
+          --url 'https://ce-platform.atlassian.net/rest/agile/1.0/board/${{ secrets.JIRA_BOARD_ID }}/sprint?state=active' \
+        )
+        latest_sprint_id=$(echo "$response" | jq -r '.values[0].id')
+        echo "LATEST_SPRINT_ID=$latest_sprint_id" >> $GITHUB_ENV
+    
+    - name: Get issue type 'Task' ID
+      run: |
+        ISSUE_TYPES=$(curl --silent --user '${{ secrets.JIRA_REPORTER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}' \
+          --header 'Accept: application/json' \
+          --request GET \
+          --url 'https://ce-platform.atlassian.net/rest/api/3/project/${{ secrets.JIRA_PROJECT_KEY }}' | jq '.issueTypes[] | {id, name}')
+
+        TASK_ISSUE_TYPE_ID=$(echo "$ISSUE_TYPES" | jq -r 'select(.name == "Task").id')
+        echo "TASK_ISSUE_TYPE_ID=$TASK_ISSUE_TYPE_ID" >> $GITHUB_ENV
+
+    # - name: Create Jira Issue
+    #   run: |
+    #     curl --silent --user '${{ secrets.JIRA_REPORTER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}' \
+    #       --header 'Accept: application/json' \
+    #       --header 'Content-Type: application/json' \
+    #       --request POST \
+    #       --url 'https://ce-platform.atlassian.net/rest/api/3/issue' \
+    #       --data '{
+    #         "fields": {
+    #           "project": {
+    #             "key": "${{ secrets.JIRA_PROJECT_KEY }}"
+    #           },
+    #           "assignee": {
+    #             "id": "${{ secrets.JIRA_ASSIGNEE_ID }}"
+    #           },
+    #           "summary": "Review distilled sites results - ${{ env.DATE_TODAY }}",
+    #           "description": {
+    #             "type": "doc",
+    #             "version": 1,
+    #             "content":[
+    #             {
+    #               "type": "paragraph",
+    #               "content":[
+    #                   {
+    #                     "type": "text",
+    #                     "text": "GitHub build URL: "
+    #                   },
+    #                   {
+    #                     "type": "text",
+    #                     "text": "${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}",
+    #                     "marks":[
+    #                         {
+    #                           "type": "link",
+    #                           "attrs":{
+    #                             "href": "${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
+    #                           }
+    #                         }
+    #                     ]
+    #                   }
+    #               ]
+    #             }
+    #           ]
+    #           },                
+    #           "issuetype": {
+    #             "id": "${{ env.TASK_ISSUE_TYPE_ID }}"
+    #           },
+    #           "customfield_10007": ${{ env.LATEST_SPRINT_ID }}
+    #         },
+    #         "update": {}
+    #       }'
