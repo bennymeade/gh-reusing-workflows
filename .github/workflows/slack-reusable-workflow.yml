@@ -26,4 +26,4 @@ jobs:
         run: |
           # echo "text: 'UOL: "${{ github.head_ref || github.ref_name }}" branch info for test pack "${{github.event.inputs.test-pack || env.DEFAULT_TEST_PACK}} - ${{ matrix.platform}}":construction_worker:'""
           # echo "text: 'UOL: "${{ github.head_ref || github.ref_name }}" branch info for test pack "${{github.event.inputs.test-pack }} - ${{ matrix.platform}}":construction_worker:'""
-          echo "text: 'UOL: "${{ github.head_ref || github.ref_name }}" branch info for test pack "${{github.event.inputs.test-pack }}":construction_worker:'""
+          echo "text: 'UOL: "${{ github.head_ref || github.ref_name }}" branch info for test pack "${{github.event.inputs.test-pack }}":construction_worker:'"
