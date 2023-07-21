@@ -14,6 +14,12 @@ jobs:
         with:
           workflow: plugin-reusable-workflow.yml
 
+      - name: Run cypress tests
+        run: |
+          cd ..
+        env:
+          CYPRESS_DELAY_TEST: '1000'
+
   call-workflow-passing-data:
     # uses -> https://docs.github.com/en/actions/using-workflows/reusing-workflows
     uses: ./.github/workflows/github-reusable-workflow.yml
