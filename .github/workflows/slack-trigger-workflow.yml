@@ -1,0 +1,35 @@
+name: Triggering slack workflow
+
+env:
+  DEFAULT_TEST_PACK: 'DEV full suite of tests'
+
+on:
+  workflow_dispatch:
+    inputs:
+      test-pack:
+        type: choice
+        description: Select smoke/regression test pack
+        options:
+          - DEV full suite of tests
+          - DEV specific tagged tests
+          - DEV JS disabled tests
+          - ALL QA sites smoke tests
+          - All Stage sites smoke tests
+        required: true
+      tagToTest:
+        description:
+          "If test pack option requires 'specific tagged tests' enter tag name to run relative to the /integration/ folder, example: @component @keyboard-nav."
+        required: false
+        default: '@'
+      enableVideo:
+        type: boolean
+        description: 'Tick checkbox to enable video capture.'
+        required: true
+
+jobs:
+  call-workflow-passing-data:
+    # uses -> https://docs.github.com/en/actions/using-workflows/reusing-workflows
+    uses: ./.github/workflows/slack-reusable-workflow.yml
+    with:
+      test-pack: ${{ github.event.inputs.test-pack }}
+    secrets: inherit

@@ -1,0 +1,28 @@
+name: Reusable workflow for Slack notifications
+
+on:
+  workflow_call:
+    inputs:
+      test-pack:
+        required: true
+        type: string
+    secrets:
+      SLACK_WEBHOOK_URL:
+        required: true
+      SLACK_TOKEN_CYPRESS_ASSETS:
+        required: true
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        platform: ['desktop']
+        os: [ubuntu-latest]
+        node: [18]
+
+    steps:
+      - name: Slack notification with integration tests pass/fail totals
+        run: |
+          # echo "text: 'UOL: "${{ github.head_ref || github.ref_name }}" branch info for test pack "${{github.event.inputs.test-pack || env.DEFAULT_TEST_PACK}} - ${{ matrix.platform}}":construction_worker:'""
+          echo "text: 'UOL: "${{ github.head_ref || github.ref_name }}" branch info for test pack "${{github.event.inputs.test-pack }} - ${{ matrix.platform}}":construction_worker:'""
