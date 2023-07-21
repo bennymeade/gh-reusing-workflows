@@ -1,4 +1,4 @@
-name: Triggering slack workflow
+name: Slack triggering workflow
 
 env:
   DEFAULT_TEST_PACK: 'DEV full suite of tests'

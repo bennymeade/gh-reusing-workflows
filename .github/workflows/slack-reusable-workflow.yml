@@ -1,4 +1,4 @@
-name: Reusable workflow for Slack notifications
+name: Slack notifications reusable workflow 
 
 on:
   workflow_call:
